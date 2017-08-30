@@ -17,6 +17,7 @@
 package simplewebcrawler;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -40,10 +44,19 @@ public class CrawlerControllerTest {
     private Gson gson = new Gson();
 
     @Test
-    public void shouldReturnCorrectUrl() throws Exception {
-        mockMvc.perform(get("/crawl?url=abc"))
+    public void shouldReturnCorrectResultGivenCorrectUrl() throws Exception {
+        String url = "http://www.bigmusicshop.com.au/";
+        String title = "Big Music Shop - Australia\u0027s #1 Music Store - Big Music Australia";
+
+        List<Crawler> expectedResult = new ArrayList<>();
+        expectedResult.add(new Crawler(url, title, null));
+
+        String jsonContent = gson.toJson(expectedResult, TypeToken.getParameterized(ArrayList.class, Crawler.class).getType());
+        System.out.println(jsonContent);
+
+        mockMvc.perform(get(String.format("/crawl?url=%s", url)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(new Crawler("abc", "there", null))));
+                .andExpect(content().string(jsonContent));
     }
 
     @Test
