@@ -1,32 +1,39 @@
 package simplewebcrawler;
 
+import java.util.List;
+
 public class Crawler {
     private String url;
     private String title;
-    private Crawler crawler;
+    private List<Crawler> nodes;
 
-//    @JsonCreator
-//    public Crawler(@JsonProperty("url") String url, @JsonProperty("title") String title, @JsonProperty("crawler") Crawler crawler) {
-//        this.url = url;
-//        this.title = title;
-//        this.crawler = crawler;
-//    }
-
-    public Crawler(String url, String title, Crawler crawler) {
+    public Crawler(String url, String title, List<Crawler> nodes) {
         this.url = url;
         this.title = title;
-        this.crawler = crawler;
+        this.nodes = nodes;
     }
 
     public String getUrl() {
         return url;
     }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getTitle() {
         return title;
     }
 
-    public Crawler getCrawler() {
-        return crawler;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<Crawler> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(List<Crawler> nodes) {
+        this.nodes = nodes;
     }
 }
