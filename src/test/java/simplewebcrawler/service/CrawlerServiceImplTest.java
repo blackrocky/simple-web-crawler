@@ -21,6 +21,7 @@ import simplewebcrawler.Crawler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -33,6 +34,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 public class CrawlerServiceImplTest {
     private static final String TEST_URL = "http://www.mysite.com/";
     private static final String TEST_TITLE = "My title";
+    private static final List<String> TEST_LINKS = Arrays.asList("http://www.link1.com/", "http://www.link2.com/");
 
     @Mock
     private Connection mockConnection;
@@ -59,11 +61,12 @@ public class CrawlerServiceImplTest {
         titles = new Elements(titleList);
 
         List<Element> linkList = new ArrayList<>();
-        Attributes attributes = new Attributes();
-        Attribute attribute = new Attribute("href", "http://www.link.com/");
-        attributes.put(attribute);
-        Element link = new Element(Tag.valueOf("a"), "", attributes);
-        linkList.add(link);
+        TEST_LINKS.forEach(testLink -> {
+            Attributes attributes = new Attributes();
+            attributes.put(new Attribute("href", testLink));
+            Element link = new Element(Tag.valueOf("a"), "", attributes);
+            linkList.add(link);
+        });
         links = new Elements(linkList);
 
         when(mockDocument.select("title")).thenReturn(titles);
@@ -76,8 +79,10 @@ public class CrawlerServiceImplTest {
     @Test
     public void shouldCrawlUrl() throws Exception {
         Crawler crawler = crawlService.crawlURL(TEST_URL);
+        System.out.println(crawler);
 
         assertThat(crawler.getUrl(), is(TEST_URL));
         assertThat(crawler.getTitle(), is(TEST_TITLE));
+        assertThat(crawler.getNodes().size(), is(2));
     }
 }
