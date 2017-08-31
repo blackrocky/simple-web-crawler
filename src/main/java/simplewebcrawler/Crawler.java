@@ -36,4 +36,13 @@ public class Crawler {
     public void setNodes(List<Crawler> nodes) {
         this.nodes = nodes;
     }
+
+    @Override
+    public String toString() {
+        return "Crawler{" +
+                "url='" + url + '\'' +
+                ", title='" + title + '\'' +
+                ", nodes=" + nodes +
+                '}';
+    }
 }
