@@ -13,7 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -27,6 +26,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
@@ -51,7 +51,8 @@ public class CrawlerServiceImplTest {
 
     @Before
     public void setUp() throws IOException {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this);
+        crawlService.setDepth(1);
 
         // TODO improve list insertions
         List<Element> titleList = new ArrayList<>();
