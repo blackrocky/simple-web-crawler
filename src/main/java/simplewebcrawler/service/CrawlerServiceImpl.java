@@ -4,6 +4,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import simplewebcrawler.Crawler;
@@ -11,17 +13,23 @@ import simplewebcrawler.Crawler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Service
 public class CrawlerServiceImpl implements CrawlerService {
-    private final static Logger LOGGER = Logger.getLogger(CrawlerServiceImpl.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
     private int depth;
 
     @Override
     public Crawler crawlURL(String url) throws IOException {
-        LOGGER.info("crawling url " + url);
-        Document document = Jsoup.connect(url).get();
+        LOGGER.info("crawling url {}", url);
+
+        Document document = null;
+        try {
+            document = Jsoup.connect(url).get();
+        } catch (IOException e) {
+            LOGGER.error("Problem accessing url {}", url);
+            throw e;
+        }
         Element title = document.select("title").get(0);
         Elements links = document.select("a[href]");
 

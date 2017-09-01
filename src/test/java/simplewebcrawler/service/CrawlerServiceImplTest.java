@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,6 +17,8 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import simplewebcrawler.Crawler;
 
 import java.io.IOException;
@@ -26,12 +29,15 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jsoup.class})
+@PrepareForTest({Jsoup.class, LoggerFactory.class})
 public class CrawlerServiceImplTest {
     private static final String ROOT_URL = "http://www.mysite.com/";
     private static final String ROOT_TITLE = "My root title";
@@ -68,9 +74,17 @@ public class CrawlerServiceImplTest {
     @Mock
     private Document mock_1_2_Document;
 
+    private static Logger mockLogger;
+
     @InjectMocks
     private CrawlerServiceImpl crawlService;
 
+    @BeforeClass
+    public static void setUpLogger() {
+        mockStatic(LoggerFactory.class);
+        mockLogger = PowerMockito.mock(Logger.class);
+        PowerMockito.when(LoggerFactory.getLogger(any(Class.class))).thenReturn(mockLogger);
+    }
 
     @Before
     public void setUp() throws IOException {
@@ -152,6 +166,20 @@ public class CrawlerServiceImplTest {
         assertThat(crawler.getNodes().get(1).getUrl(), is(LINK_1_2_URL));
         assertThat(crawler.getNodes().get(1).getTitle(), is(LINK_1_2_TITLE));
         assertThat(crawler.getNodes().get(1).getNodes().size(), is(0));
+    }
+
+    @Test
+    public void shouldStopCrawlingWhenRootUrlIsNotAccessible() throws Exception {
+        mockStatic(Jsoup.class);
+        when(mockRootConnection.get()).thenThrow(new IOException());
+        PowerMockito.when(Jsoup.connect(ROOT_URL)).thenReturn(mockRootConnection);
+
+        try {
+            Crawler crawler = crawlService.crawlURL(ROOT_URL);
+            fail("expected to throw IOException");
+        } catch (IOException expected) {
+            verify(mockLogger).error("Problem accessing url {}", ROOT_URL);
+        }
     }
 
     private Elements setUpLinks(List<String> links) {
