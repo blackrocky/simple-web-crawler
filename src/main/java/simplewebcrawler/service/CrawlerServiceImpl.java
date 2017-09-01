@@ -2,7 +2,6 @@ package simplewebcrawler.service;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,7 @@ public class CrawlerServiceImpl implements CrawlerService {
             LOGGER.error("Problem accessing url {}", url);
             throw e;
         }
-        Element title = document.select("title").get(0);
+        Elements titles = document.select("title");
         Elements links = document.select("a[href]");
 
         List<Crawler> childNodes = new ArrayList<>();
@@ -38,10 +37,11 @@ public class CrawlerServiceImpl implements CrawlerService {
             try {
                 childNodes.add(crawlURL(link.attr("href")));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Problem accessing url {}, moving on to the next one", link.attr("href"));
             }
         });
-        return new Crawler(url, title.text(), childNodes);
+
+        return new Crawler(url, titles == null || titles.size() == 0 ? "" : titles.get(0).text(), childNodes);
     }
 
     // TODO remove

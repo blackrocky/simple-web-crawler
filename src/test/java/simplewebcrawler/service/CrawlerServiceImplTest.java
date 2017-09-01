@@ -182,6 +182,70 @@ public class CrawlerServiceImplTest {
         }
     }
 
+    @Test
+    public void shouldContinueCrawlingWhenOneOfTheLinksIsNotAccessible() throws Exception {
+        when(mockRootDocument.select("title")).thenReturn(setUpTitle(ROOT_TITLE));
+        when(mockRootDocument.select("a[href]")).thenReturn(setUpLinks(ROOT_LINKS));
+        when(mockRootConnection.get()).thenReturn(mockRootDocument);
+
+        when(mock_1_1_Connection.get()).thenThrow(new IOException());
+
+        when(mock_1_2_Document.select("title")).thenReturn(setUpTitle(LINK_1_2_TITLE));
+        when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
+        when(mock_1_2_Connection.get()).thenReturn(mock_1_2_Document);
+
+        mockStatic(Jsoup.class);
+        PowerMockito.when(Jsoup.connect(ROOT_URL)).thenReturn(mockRootConnection);
+        PowerMockito.when(Jsoup.connect(LINK_1_1_URL)).thenReturn(mock_1_1_Connection);
+        PowerMockito.when(Jsoup.connect(LINK_1_2_URL)).thenReturn(mock_1_2_Connection);
+
+        Crawler crawler = crawlService.crawlURL(ROOT_URL);
+
+        assertThat(crawler.getUrl(), is(ROOT_URL));
+        assertThat(crawler.getTitle(), is(ROOT_TITLE));
+        assertThat(crawler.getNodes().size(), is(1));
+
+        assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_2_URL));
+        assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_2_TITLE));
+        assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
+
+        verify(mockLogger).error("Problem accessing url {}, moving on to the next one", LINK_1_1_URL);
+    }
+
+    @Test
+    public void shouldHandleBlankTitle() throws Exception {
+        when(mockRootDocument.select("title")).thenReturn(new Elements());
+        when(mockRootDocument.select("a[href]")).thenReturn(setUpLinks(ROOT_LINKS));
+        when(mockRootConnection.get()).thenReturn(mockRootDocument);
+
+        when(mock_1_1_Document.select("title")).thenReturn(setUpTitle(LINK_1_1_TITLE));
+        when(mock_1_1_Document.select("a[href]")).thenReturn(new Elements());
+        when(mock_1_1_Connection.get()).thenReturn(mock_1_1_Document);
+
+        when(mock_1_2_Document.select("title")).thenReturn(setUpTitle(LINK_1_2_TITLE));
+        when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
+        when(mock_1_2_Connection.get()).thenReturn(mock_1_2_Document);
+
+        mockStatic(Jsoup.class);
+        PowerMockito.when(Jsoup.connect(ROOT_URL)).thenReturn(mockRootConnection);
+        PowerMockito.when(Jsoup.connect(LINK_1_1_URL)).thenReturn(mock_1_1_Connection);
+        PowerMockito.when(Jsoup.connect(LINK_1_2_URL)).thenReturn(mock_1_2_Connection);
+
+        Crawler crawler = crawlService.crawlURL(ROOT_URL);
+
+        assertThat(crawler.getUrl(), is(ROOT_URL));
+        assertThat(crawler.getTitle(), is(""));
+        assertThat(crawler.getNodes().size(), is(2));
+
+        assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_1_URL));
+        assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_1_TITLE));
+        assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
+
+        assertThat(crawler.getNodes().get(1).getUrl(), is(LINK_1_2_URL));
+        assertThat(crawler.getNodes().get(1).getTitle(), is(LINK_1_2_TITLE));
+        assertThat(crawler.getNodes().get(1).getNodes().size(), is(0));
+    }
+
     private Elements setUpLinks(List<String> links) {
         List<Element> linkList = new ArrayList<>();
         links.forEach(testLink -> {
@@ -200,5 +264,4 @@ public class CrawlerServiceImplTest {
         titleElementList.add(titleElement);
         return new Elements(titleElementList);
     }
-
 }
