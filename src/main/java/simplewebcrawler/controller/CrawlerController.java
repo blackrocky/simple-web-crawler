@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import simplewebcrawler.Crawler;
 import simplewebcrawler.service.CrawlerService;
+import simplewebcrawler.service.impl.Crawler;
 
 import java.io.IOException;
 import java.net.URL;

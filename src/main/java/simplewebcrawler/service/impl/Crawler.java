@@ -1,4 +1,4 @@
-package simplewebcrawler;
+package simplewebcrawler.service.impl;
 
 import java.util.List;
 
@@ -17,24 +17,12 @@ public class Crawler {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public List<Crawler> getNodes() {
         return nodes;
-    }
-
-    public void setNodes(List<Crawler> nodes) {
-        this.nodes = nodes;
     }
 
     @Override

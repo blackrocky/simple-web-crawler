@@ -22,8 +22,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import simplewebcrawler.Crawler;
 import simplewebcrawler.service.CrawlerService;
+import simplewebcrawler.service.impl.Crawler;
 
 import java.net.URL;
 

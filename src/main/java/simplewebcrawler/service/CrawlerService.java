@@ -1,6 +1,6 @@
 package simplewebcrawler.service;
 
-import simplewebcrawler.Crawler;
+import simplewebcrawler.service.impl.Crawler;
 
 import java.io.IOException;
 import java.net.URL;

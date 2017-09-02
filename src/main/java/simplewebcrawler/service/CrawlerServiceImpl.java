@@ -7,17 +7,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import simplewebcrawler.Crawler;
+import simplewebcrawler.service.impl.Crawler;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class CrawlerServiceImpl implements CrawlerService {
     private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
-    private int timeout;
+    private int timeoutInMillis;
+    private Set<URL> urlSet = ConcurrentHashMap.newKeySet();
 
     @Override
     public Crawler crawlURL(URL url) throws IOException {
@@ -25,11 +28,13 @@ public class CrawlerServiceImpl implements CrawlerService {
             LOGGER.error("url must not be null");
             throw new IllegalStateException("url must not be null");
         }
-        LOGGER.info("crawling url {} with timeout {} milliseconds", url.toString(), timeout);
+        LOGGER.info("crawling url {} with timeout {} milliseconds", url.toString(), timeoutInMillis);
+
+        urlSet.add(url);
 
         Document document = null;
         try {
-            document = Jsoup.parse(url, timeout);
+            document = Jsoup.parse(url, timeoutInMillis);
         } catch (IOException e) {
             LOGGER.error("Problem accessing url {}", url.toString());
             throw e;
@@ -40,7 +45,10 @@ public class CrawlerServiceImpl implements CrawlerService {
         List<Crawler> childNodes = new ArrayList<>();
         links.forEach(link -> {
             try {
-                childNodes.add(crawlURL(new URL(link.attr("href"))));
+                URL hrefUrl = new URL(link.attr("href"));
+                if (!urlSet.contains(hrefUrl)) {
+                    childNodes.add(crawlURL(hrefUrl));
+                }
             } catch (IOException e) {
                 LOGGER.error("Problem accessing url {}, moving on to the next one", link.attr("href"));
             }
@@ -50,7 +58,7 @@ public class CrawlerServiceImpl implements CrawlerService {
     }
 
     @Value("${simplewebcrawler.timeout.millis:10000}")
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public void setTimeoutInMillis(int timeoutInMillis) {
+        this.timeoutInMillis = timeoutInMillis;
     }
 }
