@@ -30,7 +30,7 @@ public class CrawlerServiceImpl implements CrawlerPort {
     @Override
     public Crawler crawlURL(URL rootUrl) throws IOException {
         if (!URLValidator.isValid(rootUrl)) {
-            LOGGER.error("rootUrl must be valid");
+            LOGGER.warn("rootUrl must be valid");
             throw new IllegalStateException();
         }
 

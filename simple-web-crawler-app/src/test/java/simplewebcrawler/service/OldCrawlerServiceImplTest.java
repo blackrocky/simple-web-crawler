@@ -169,7 +169,7 @@ public class OldCrawlerServiceImplTest {
             crawlService.crawlURL(new URL(ROOT_URL));
             fail("expected to throw IOException");
         } catch (Exception expected) {
-            verify(mockLogger).error("Problem accessing url {}", ROOT_URL);
+            verify(mockLogger).warn("Problem accessing url {}", ROOT_URL);
         }
     }
 
@@ -179,7 +179,7 @@ public class OldCrawlerServiceImplTest {
             crawlService.crawlURL(null);
             fail("expected to throw Exception");
         } catch (Exception expected) {
-            verify(mockLogger).error("url must be valid");
+            verify(mockLogger).warn("url must be valid");
         }
     }
 
@@ -206,7 +206,7 @@ public class OldCrawlerServiceImplTest {
         assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_2_TITLE));
         assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
 
-        verify(mockLogger).error("Problem accessing url {}, moving on to the next one", LINK_1_1_URL);
+        verify(mockLogger).warn("Problem accessing url {}, moving on to the next one", LINK_1_1_URL);
     }
 
     @Test

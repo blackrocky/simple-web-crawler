@@ -33,7 +33,7 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
     @Override
     public Crawler crawlURL(URL url) throws IOException {
         if (!URLValidator.isValid(url)) {
-            LOGGER.error("url must be valid");
+            LOGGER.warn("url must be valid");
             throw new IllegalStateException();
         }
         Crawler crawler = crawlURL(singletonList(url), maxDepth);
@@ -66,10 +66,10 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
             try {
                 singleCrawler = singleCrawlerFuture.get();
             } catch (ExecutionException e) {
-                LOGGER.error("Problem accessing url {}", String.valueOf(singleCrawler.getUrl()));
+                LOGGER.warn("Problem accessing url {}", String.valueOf(singleCrawler.getUrl()));
                 System.out.println("Problem accessing url " + String.valueOf(singleCrawler.getUrl()));
             } catch (InterruptedException e) {
-                LOGGER.error("Problem accessing url {}", String.valueOf(singleCrawler.getUrl()));
+                LOGGER.warn("Problem accessing url {}", String.valueOf(singleCrawler.getUrl()));
                 System.out.println("Problem accessing url " + String.valueOf(singleCrawler.getUrl()));
             }
 
@@ -100,7 +100,7 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
 
                 crawler.getNodes().add(crawlerChild);
             } catch (ExecutionException e) {
-                LOGGER.error("Problem accessing url {}, moving on to the next one", String.valueOf(linkUrl));
+                LOGGER.warn("Problem accessing url {}, moving on to the next one", String.valueOf(linkUrl));
                 continue;
             } catch (InterruptedException e) {
                 e.printStackTrace();

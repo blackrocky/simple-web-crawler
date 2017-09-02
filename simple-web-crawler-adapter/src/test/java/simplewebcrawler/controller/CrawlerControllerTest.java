@@ -26,11 +26,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import simplewebcrawler.CrawlerPort;
+import simplewebcrawler.validator.URLStringValidator;
 
 import java.net.URL;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,6 +42,9 @@ public class CrawlerControllerTest {
 
     @Mock
     private CrawlerPort crawlerPort;
+
+    @Mock
+    private URLStringValidator urlStringValidator;
 
     @InjectMocks
     private CrawlerController crawlerController;
@@ -55,8 +58,11 @@ public class CrawlerControllerTest {
 
     @Test
     public void shouldCallCrawlerPort_GivenCorrectParameter() throws Exception {
+        when(urlStringValidator.isValid(TEST_URL)).thenReturn(true);
         mockMvc.perform(get(String.format("/crawl?url=%s", TEST_URL)))
                 .andExpect(status().isOk());
+
+        verify(urlStringValidator).isValid(TEST_URL);
         verify(crawlerPort).crawlURL(new URL(TEST_URL));
     }
 
@@ -64,6 +70,7 @@ public class CrawlerControllerTest {
     public void shouldReturnNotFound_AndNotCallPort_GivenIncorrectUrl() throws Exception {
         mockMvc.perform(get(String.format("/crrawl?url=%s", TEST_URL)))
                 .andExpect(status().isNotFound());
+        verifyZeroInteractions(urlStringValidator);
         verifyZeroInteractions(crawlerPort);
     }
 
@@ -71,6 +78,7 @@ public class CrawlerControllerTest {
     public void shouldReturnBadRequest_AndNotCallPort_GivenIncorrectParameter() throws Exception {
         mockMvc.perform(get(String.format("/crawl?urrl=%s", TEST_URL)))
                 .andExpect(status().isBadRequest());
+        verifyZeroInteractions(urlStringValidator);
         verifyZeroInteractions(crawlerPort);
     }
 }

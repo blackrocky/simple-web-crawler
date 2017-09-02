@@ -29,7 +29,7 @@ public class SingleCrawlerCallable implements Callable<SingleCrawler> {
     @Override
     public SingleCrawler call() throws Exception {
         if (!URLValidator.isValid(url)) {
-            LOGGER.error("url is not valid");
+            LOGGER.warn("url is not valid");
             throw new IllegalStateException("url not valid");
         }
         LOGGER.info("Crawling url {}", url.toString());
@@ -38,7 +38,7 @@ public class SingleCrawlerCallable implements Callable<SingleCrawler> {
         try {
             document = Jsoup.parse(url, timeoutInMillis);
         } catch (IOException e) {
-            LOGGER.error("Problem accessing url {}", String.valueOf(url));
+            LOGGER.warn("Problem accessing url {}", String.valueOf(url));
             throw new IOException("Problem accessing url " + String.valueOf(url));
         }
 
