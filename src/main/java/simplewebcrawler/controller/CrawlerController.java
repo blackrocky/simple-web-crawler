@@ -12,6 +12,7 @@ import simplewebcrawler.Crawler;
 import simplewebcrawler.service.CrawlerService;
 
 import java.io.IOException;
+import java.net.URL;
 
 @RestController
 public class CrawlerController {
@@ -22,7 +23,7 @@ public class CrawlerController {
     @RequestMapping("/crawl")
     @ResponseBody
     public HttpEntity<Crawler> crawl(@RequestParam(value = "url") String url) throws IOException {
-        Crawler crawler = crawlerService.crawlURL(url);
+        Crawler crawler = crawlerService.crawlURL(new URL(url));
 
         return new ResponseEntity<>(crawler, HttpStatus.OK);
     }

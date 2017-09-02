@@ -10,23 +10,24 @@ import org.springframework.stereotype.Service;
 import simplewebcrawler.Crawler;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CrawlerServiceImpl implements CrawlerService {
     private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
-    private int depth;
+    private int timeout;
 
     @Override
-    public Crawler crawlURL(String url) throws IOException {
+    public Crawler crawlURL(URL url) throws IOException {
         LOGGER.info("crawling url {}", url);
 
         Document document = null;
         try {
-            document = Jsoup.connect(url).get();
+            document = Jsoup.parse(url, timeout);
         } catch (IOException e) {
-            LOGGER.error("Problem accessing url {}", url);
+            LOGGER.error("Problem accessing url {}", url.toString());
             throw e;
         }
         Elements titles = document.select("title");
@@ -35,18 +36,17 @@ public class CrawlerServiceImpl implements CrawlerService {
         List<Crawler> childNodes = new ArrayList<>();
         links.forEach(link -> {
             try {
-                childNodes.add(crawlURL(link.attr("href")));
+                childNodes.add(crawlURL(new URL(link.attr("href"))));
             } catch (IOException e) {
                 LOGGER.error("Problem accessing url {}, moving on to the next one", link.attr("href"));
             }
         });
 
-        return new Crawler(url, titles == null || titles.size() == 0 ? "" : titles.get(0).text(), childNodes);
+        return new Crawler(url.toString(), titles == null || titles.size() == 0 ? "" : titles.get(0).text(), childNodes);
     }
 
-    // TODO remove
-    @Value("${simplewebcrawler.depth:1}")
-    public void setDepth(int depth) {
-        this.depth = depth;
+    @Value("${simplewebcrawler.timeout.seconds:8}")
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 }

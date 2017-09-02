@@ -25,6 +25,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import simplewebcrawler.Crawler;
 import simplewebcrawler.service.CrawlerService;
 
+import java.net.URL;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,9 +43,9 @@ public class CrawlerControllerTest {
 
     @Test
     public void shouldCrawlUrlWithNoLinks() throws Exception {
-        when(crawlerService.crawlURL(TEST_URL)).thenReturn(new Crawler("http://mysite.com/", "my site", null));
+        when(crawlerService.crawlURL(new URL(TEST_URL))).thenReturn(new Crawler("http://mysite.com/", "my site", null));
         crawlerController.crawl(TEST_URL);
 
-        verify(crawlerService).crawlURL(TEST_URL);
+        verify(crawlerService).crawlURL(new URL(TEST_URL));
     }
 }
