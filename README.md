@@ -16,6 +16,7 @@ you had to make during development.
 - Identical link can only be process once in 1 crawl
 - Max depth can be set in properties file
 - Connection and read timeout can be set in properties file
+- Relative links?
 - OWASP concerns?
 - Store processed links in db/file
 - Respect robots.txt
@@ -39,4 +40,5 @@ you had to make during development.
 - Gradle (bundled)
 
 ## Usage
-- ./gradlew bootRun
+- cd simple-web-crawler-jar-deployable
+- ../gradlew bootRun

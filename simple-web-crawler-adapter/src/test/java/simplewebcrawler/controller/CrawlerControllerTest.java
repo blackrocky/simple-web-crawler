@@ -22,8 +22,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import simplewebcrawler.service.CrawlerService;
-import simplewebcrawler.service.impl.Crawler;
+import simplewebcrawler.CrawlerPort;
+import simplewebcrawler.provides.Crawler;
 
 import java.net.URL;
 
@@ -36,16 +36,16 @@ public class CrawlerControllerTest {
     private static final String TEST_URL = "http://mysite.com/";
 
     @Mock
-    private CrawlerService crawlerService;
+    private CrawlerPort crawlerPort;
 
     @InjectMocks
     private CrawlerController crawlerController;
 
     @Test
     public void shouldCrawlUrlWithNoLinks() throws Exception {
-        when(crawlerService.crawlURL(new URL(TEST_URL))).thenReturn(new Crawler("http://mysite.com/", "my site", null));
+        when(crawlerPort.crawlURL(new URL(TEST_URL))).thenReturn(new Crawler("http://mysite.com/", "my site", null));
         crawlerController.crawl(TEST_URL);
 
-        verify(crawlerService).crawlURL(new URL(TEST_URL));
+        verify(crawlerPort).crawlURL(new URL(TEST_URL));
     }
 }

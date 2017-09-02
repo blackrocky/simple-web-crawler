@@ -8,12 +8,11 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
 jar {
-    baseName = 'simple-web-crawler'
+    baseName = 'simple-web-crawler-app'
     version =  '0.1.0'
 }
 
@@ -25,6 +24,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+    compile project(':simple-web-crawler-port')
     compile("org.jsoup:jsoup:1.10.3")
     compile("com.google.code.gson:gson:2.8.1")
     compile("org.springframework.boot:spring-boot-starter-web") {

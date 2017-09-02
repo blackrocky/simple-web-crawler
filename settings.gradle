@@ -1,0 +1,6 @@
+rootProject.name = 'simple-web-crawler'
+
+include 'simple-web-crawler-port'
+include 'simple-web-crawler-adapter'
+include 'simple-web-crawler-app'
+include 'simple-web-crawler-jar-deployable'

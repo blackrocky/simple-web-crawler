@@ -1,4 +1,4 @@
-package simplewebcrawler.service.impl;
+package simplewebcrawler.provides;
 
 import java.util.List;
 

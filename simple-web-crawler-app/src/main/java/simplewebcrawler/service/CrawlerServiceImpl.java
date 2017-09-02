@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import simplewebcrawler.service.impl.Crawler;
+import simplewebcrawler.CrawlerPort;
+import simplewebcrawler.provides.Crawler;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,7 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class CrawlerServiceImpl implements CrawlerService {
+public class CrawlerServiceImpl implements CrawlerPort {
     private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
     private Set<URL> urlSet = ConcurrentHashMap.newKeySet();
 

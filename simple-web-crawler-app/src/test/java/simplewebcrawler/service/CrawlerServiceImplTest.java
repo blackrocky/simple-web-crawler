@@ -17,7 +17,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import simplewebcrawler.service.impl.Crawler;
+import simplewebcrawler.provides.Crawler;
 
 import java.io.IOException;
 import java.net.URL;
