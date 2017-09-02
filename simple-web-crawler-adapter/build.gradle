@@ -29,8 +29,10 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude group: 'com.fasterxml.jackson.core'
     }
+    compile("com.google.code.gson:gson:2.8.1")
     testCompile("junit:junit:4.12")
     testCompile("org.powermock:powermock-module-junit4:1.7.1")
     testCompile("org.powermock:powermock-api-mockito:1.7.1")
+    testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 

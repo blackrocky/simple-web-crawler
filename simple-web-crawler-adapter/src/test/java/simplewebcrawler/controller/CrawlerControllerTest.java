@@ -17,18 +17,23 @@
 package simplewebcrawler.controller;
 
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import simplewebcrawler.CrawlerPort;
-import simplewebcrawler.provides.Crawler;
 
 import java.net.URL;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class CrawlerControllerTest {
@@ -41,11 +46,38 @@ public class CrawlerControllerTest {
     @InjectMocks
     private CrawlerController crawlerController;
 
-    @Test
-    public void shouldCrawlUrlWithNoLinks() throws Exception {
-        when(crawlerPort.crawlURL(new URL(TEST_URL))).thenReturn(new Crawler("http://mysite.com/", "my site", null));
-        crawlerController.crawl(TEST_URL);
+    private MockMvc mockMvc;
 
+    @Before
+    public void setup() {
+        mockMvc = MockMvcBuilders.standaloneSetup(crawlerController).build();
+    }
+
+    @Test
+    public void shouldCallCrawlerPort_GivenCorrectParameter() throws Exception {
+        mockMvc.perform(get(String.format("/crawl?url=%s", TEST_URL)))
+                .andExpect(status().isOk());
         verify(crawlerPort).crawlURL(new URL(TEST_URL));
+    }
+
+    @Test
+    public void shouldReturnNotFound_AndNotCallPort_GivenIncorrectUrl() throws Exception {
+        mockMvc.perform(get(String.format("/crrawl?url=%s", TEST_URL)))
+                .andExpect(status().isNotFound());
+        verifyZeroInteractions(crawlerPort);
+    }
+
+    @Test
+    public void shouldReturnBadRequest_AndNotCallPort_GivenIncorrectParameter() throws Exception {
+        mockMvc.perform(get(String.format("/crawl?urrl=%s", TEST_URL)))
+                .andExpect(status().isBadRequest());
+        verifyZeroInteractions(crawlerPort);
+    }
+
+    @Test
+    public void shouldReturnBadRequest_GivenBadUrl() throws Exception {
+        mockMvc.perform(get(String.format("/crawl?url=%s", "wwwww")))
+                .andExpect(status().isBadRequest());
+        verifyZeroInteractions(crawlerPort);
     }
 }

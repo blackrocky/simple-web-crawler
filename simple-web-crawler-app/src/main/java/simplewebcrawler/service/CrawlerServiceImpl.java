@@ -3,7 +3,6 @@ package simplewebcrawler.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import simplewebcrawler.CrawlerPort;
 import simplewebcrawler.provides.Crawler;
 import simplewebcrawler.validator.URLValidator;
@@ -19,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Service
 public class CrawlerServiceImpl implements CrawlerPort {
     private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
     private Map<URL, List<Crawler>> masterMap = new ConcurrentHashMap<>();
