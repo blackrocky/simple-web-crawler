@@ -24,7 +24,6 @@ public class CrawlerController {
     @ResponseBody
     public HttpEntity<Crawler> crawl(@RequestParam(value = "url") String url) throws IOException {
         Crawler crawler = crawlerPort.crawlURL(new URL(url));
-
         return new ResponseEntity<>(crawler, HttpStatus.OK);
     }
 }

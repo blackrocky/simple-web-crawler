@@ -53,6 +53,7 @@ public class CrawlerServiceImplTest {
 
     private static final List<String> ROOT_LINKS = asList(LINK_1_1_URL, LINK_1_2_URL);
     private static final List<String> ROOT_LINKS_DUPLICATE = asList(LINK_1_1_URL, LINK_1_1_URL);
+    private static final List<String> ROOT_LINKS_WITH_MAILTO = asList("mailto:ab@cde.com", LINK_1_1_URL);
 
 
     private static final int DEFAULT_TIMEOUT_MILLIS = 20000;
@@ -167,7 +168,7 @@ public class CrawlerServiceImplTest {
         try {
             crawlService.crawlURL(new URL(ROOT_URL));
             fail("expected to throw IOException");
-        } catch (IOException expected) {
+        } catch (Exception expected) {
             verify(mockLogger).error("Problem accessing url {}", ROOT_URL);
         }
     }
@@ -177,7 +178,7 @@ public class CrawlerServiceImplTest {
         try {
             crawlService.crawlURL(null);
             fail("expected to throw IllegalStateException");
-        } catch (IllegalStateException expected) {
+        } catch (Exception expected) {
             verify(mockLogger).error("url must not be null");
         }
     }
@@ -297,6 +298,32 @@ public class CrawlerServiceImplTest {
         assertThat(crawler.getNodes().get(1).getUrl(), is(LINK_1_2_URL));
         assertThat(crawler.getNodes().get(1).getTitle(), is(LINK_1_2_TITLE));
         assertThat(crawler.getNodes().get(1).getNodes().size(), is(0));
+    }
+
+    @Test
+    public void shouldSkipMailToLinks() throws Exception {
+        when(mockRootDocument.select("title")).thenReturn(setUpTitle(ROOT_TITLE));
+        when(mockRootDocument.select("a[href]")).thenReturn(setUpLinks(ROOT_LINKS_WITH_MAILTO));
+
+        when(mock_1_1_Document.select("title")).thenReturn(setUpTitle(LINK_1_1_TITLE));
+        when(mock_1_1_Document.select("a[href]")).thenReturn(new Elements());
+
+        mockStatic(Jsoup.class);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+
+        Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
+
+        assertThat(crawler.getUrl(), is(ROOT_URL));
+        assertThat(crawler.getTitle(), is(ROOT_TITLE));
+        assertThat(crawler.getNodes().size(), is(1));
+
+        assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_1_URL));
+        assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_1_TITLE));
+        assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
+
+        verify(mockLogger).info("Skipping url {}", "mailto:ab@cde.com");
+
     }
 
     private Elements setUpLinks(List<String> links) {
