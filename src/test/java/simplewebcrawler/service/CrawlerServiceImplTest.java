@@ -50,7 +50,7 @@ public class CrawlerServiceImplTest {
     private static final String LINK_1_1_1_URL = "http://www.mysite.com/link11/link111";
     private static final String LINK_1_1_1_TITLE = "My ONE ONE ONE title";
     private static final List<String> LINK_1_1_LINKS = singletonList(LINK_1_1_1_URL);
-    private static final int TIMEOUT = 20;
+    private static final int TIMEOUT_MILLIS = 20000;
 
     @Mock
     private Connection mockRootConnection;
@@ -91,7 +91,7 @@ public class CrawlerServiceImplTest {
     @Before
     public void setUp() throws IOException {
         initMocks(this);
-        crawlService.setTimeout(TIMEOUT);
+        crawlService.setTimeout(TIMEOUT_MILLIS);
     }
 
     @Test
@@ -106,9 +106,9 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT)).thenReturn(mock_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -140,10 +140,10 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT)).thenReturn(mock_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_1_URL), TIMEOUT)).thenReturn(mock_1_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -167,13 +167,23 @@ public class CrawlerServiceImplTest {
     @Test
     public void shouldStopCrawlingWhenRootUrlIsNotAccessible() throws Exception {
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT)).thenThrow(new IOException());
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenThrow(new IOException());
 
         try {
-            Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
+            crawlService.crawlURL(new URL(ROOT_URL));
             fail("expected to throw IOException");
         } catch (IOException expected) {
             verify(mockLogger).error("Problem accessing url {}", ROOT_URL);
+        }
+    }
+
+    @Test
+    public void shouldStopCrawlingWhenRootUrlIsNull() throws Exception {
+        try {
+            crawlService.crawlURL(null);
+            fail("expected to throw IllegalStateException");
+        } catch (IllegalStateException expected) {
+            verify(mockLogger).error("url must not be null");
         }
     }
 
@@ -187,9 +197,9 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Connection.get()).thenReturn(mock_1_2_Document);
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT)).thenThrow(new IOException());
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenThrow(new IOException());
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -216,9 +226,9 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT)).thenReturn(mock_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 

@@ -21,7 +21,11 @@ public class CrawlerServiceImpl implements CrawlerService {
 
     @Override
     public Crawler crawlURL(URL url) throws IOException {
-        LOGGER.info("crawling url {}", url);
+        if (url == null) {
+            LOGGER.error("url must not be null");
+            throw new IllegalStateException("url must not be null");
+        }
+        LOGGER.info("crawling url {} with timeout {} milliseconds", url.toString(), timeout);
 
         Document document = null;
         try {
@@ -45,7 +49,7 @@ public class CrawlerServiceImpl implements CrawlerService {
         return new Crawler(url.toString(), titles == null || titles.size() == 0 ? "" : titles.get(0).text(), childNodes);
     }
 
-    @Value("${simplewebcrawler.timeout.seconds:8}")
+    @Value("${simplewebcrawler.timeout.millis:10000}")
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
