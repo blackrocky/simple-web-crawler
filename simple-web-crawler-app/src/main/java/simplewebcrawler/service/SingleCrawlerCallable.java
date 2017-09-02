@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import simplewebcrawler.validator.URLValidator;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -27,23 +28,18 @@ public class SingleCrawlerCallable implements Callable<SingleCrawler> {
 
     @Override
     public SingleCrawler call() throws Exception {
-        if (url == null) {
-            LOGGER.error("url must not be null");
-            throw new IllegalStateException("url must not be null");
+        if (!URLValidator.isValid(url)) {
+            LOGGER.error("url is not valid");
+            throw new IllegalStateException("url not valid");
         }
-        if (!url.getProtocol().startsWith("http")) {
-            LOGGER.error("url is not http or https {}", url);
-            System.out.println("url is not http or https " + url);
-            throw new IllegalStateException("url is not http or https " + url);
-        }
-        LOGGER.info("Crawling url {} with timeout {} milliseconds", url.toString(), timeoutInMillis);
-        System.out.println(String.format("Crawling url %s with timeout %d milliseconds", url.toString(), timeoutInMillis));
+        LOGGER.info("Crawling url {}", url.toString());
 
         Document document = null;
         try {
             document = Jsoup.parse(url, timeoutInMillis);
         } catch (IOException e) {
-            throw e;
+            LOGGER.error("Problem accessing url {}", String.valueOf(url));
+            throw new IOException("Problem accessing url " + String.valueOf(url));
         }
 
         Elements titles = document.select("title");
@@ -52,7 +48,8 @@ public class SingleCrawlerCallable implements Callable<SingleCrawler> {
         for (Element link : links) {
             String linkString = link.attr("abs:href");
             try {
-                linkList.add(new URL(linkString));
+                URL linkURL = new URL(linkString);
+                linkList.add(linkURL);
             } catch (MalformedURLException e) {
                 LOGGER.info("skipping url: {}", linkString);
                 continue;

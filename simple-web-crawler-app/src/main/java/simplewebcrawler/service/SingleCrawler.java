@@ -1,5 +1,8 @@
 package simplewebcrawler.service;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.net.URL;
 import java.util.List;
 
@@ -24,6 +27,16 @@ public class SingleCrawler {
 
     public List<URL> getLinks() {
         return links;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return EqualsBuilder.reflectionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

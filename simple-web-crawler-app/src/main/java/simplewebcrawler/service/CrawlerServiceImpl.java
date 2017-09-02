@@ -6,104 +6,90 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import simplewebcrawler.CrawlerPort;
 import simplewebcrawler.provides.Crawler;
+import simplewebcrawler.validator.URLValidator;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class CrawlerServiceImpl implements CrawlerPort {
     private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
-    private Set<URL> urlSet = ConcurrentHashMap.newKeySet();
-    private ExecutorService singleExecutorService = Executors.newSingleThreadExecutor();
+    private Map<URL, List<Crawler>> masterMap = new ConcurrentHashMap<>();
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
+    private ExecutorService singleExecutorService = Executors.newSingleThreadExecutor();
 
     private int timeoutInMillis;
     private int maxDepth;
 
     @Override
-    public Crawler crawlURL(URL url) throws IOException {
-        Crawler crawler = crawlURL(url, maxDepth);
-        LOGGER.info("FINISHED!!! {}", crawler);
-        System.out.println("FINISHED!!! " + crawler);
-        return crawler;
-    }
+    public Crawler crawlURL(URL rootUrl) throws IOException {
+        if (!URLValidator.isValid(rootUrl)) {
+            LOGGER.error("rootUrl must be valid");
+            throw new IllegalStateException();
+        }
 
-    private Crawler crawlURL(URL url, int depth) throws IOException {
-        LOGGER.info("crawling url {} with depth {}", url, depth);
-        SingleCrawlerCallable singleCrawlerCallable = new SingleCrawlerCallable(url, timeoutInMillis);
-        Future<SingleCrawler> root = singleExecutorService.submit(singleCrawlerCallable);
-        SingleCrawler singleCrawler = null;
         try {
-            singleCrawler = root.get();
+            buildMap(rootUrl, maxDepth);
         } catch (ExecutionException e) {
-            LOGGER.error("Problem accessing url {}", String.valueOf(url));
-            System.out.println("Problem accessing url " + String.valueOf(url));
+            e.printStackTrace();
         } catch (InterruptedException e) {
-            LOGGER.error("Problem accessing url {}", String.valueOf(url));
-            System.out.println("Problem accessing url " + String.valueOf(url));
+            e.printStackTrace();
         }
 
-        urlSet.add(singleCrawler.getUrl());
+        Crawler rootCrawler = constructRootCrawler(rootUrl);
 
-        Crawler crawler = new Crawler(singleCrawler.getUrl().toString(), singleCrawler.getTitle(), new ArrayList<>());
-        return crawlChildURLs(crawler, singleCrawler.getLinks(), depth - 1);
+        return rootCrawler;
     }
 
-    private Crawler crawlChildURLs(Crawler crawler, List<URL> urls, int depth) throws IOException {
-        for (URL url : urls) {
-            if (url == null) {
-                LOGGER.info("Skipping url {}", String.valueOf(url));
-                System.out.println("Skipping url " + String.valueOf(url));
-                continue;
-            }
-            if (!url.getProtocol().startsWith("http")) {
-                LOGGER.info("Skipping url {}", String.valueOf(url));
-                System.out.println("Skipping url " + String.valueOf(url));
-                continue;
-            }
-            if (urlSet.contains(url)) {
-                LOGGER.info("Skipping url {}", String.valueOf(url));
-                System.out.println("Skipping url " + String.valueOf(url));
-                continue;
-            }
-            SingleCrawlerCallable singleCrawlerCallable = new SingleCrawlerCallable(url, timeoutInMillis);
-            Future<SingleCrawler> root = executorService.submit(singleCrawlerCallable);
-            SingleCrawler singleCrawler = null;
-            try {
-                singleCrawler = root.get();
-                urlSet.add(singleCrawler.getUrl());
-            } catch (ExecutionException e) {
-                LOGGER.error("Problem accessing url {}, moving on to the next one", String.valueOf(url));
-                continue;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            Crawler crawlerChild = new Crawler(singleCrawler.getUrl().toString(), singleCrawler.getTitle(), new ArrayList<>());
-//            if (depth <= 0) {
-//                continue;
-//            } else {
-//                crawlerChild.getNodes().add(crawlChildURLs(crawlerChild, singleCrawler.getLinks(), depth - 1));
-//            }
-
-            for (URL hrefUrl : singleCrawler.getLinks()) {
-                if (depth <= 0) {
-                    continue;
-                }
-                if (hrefUrl != null && hrefUrl.getProtocol().startsWith("http") && !urlSet.contains(hrefUrl)) {
-                        crawlerChild.getNodes().add(crawlURL(hrefUrl, depth));
-                }
-            }
-
-            crawler.getNodes().add(crawlerChild);
+    private void buildMap(URL url, int depth) throws MalformedURLException, ExecutionException, InterruptedException {
+        if (depth <= 0) {
+            return;
         }
 
-        return crawler;
+        List<Crawler> children = buildChildren(url);
+        masterMap.putIfAbsent(url, children);
+
+        for (Crawler child : children) {
+            buildMap(new URL(child.getUrl()), depth - 1);
+        }
+    }
+
+    private List<Crawler> buildChildren(URL url) throws ExecutionException, InterruptedException {
+        SingleCrawlerCallable singleCrawlerCallable = new SingleCrawlerCallable(url, timeoutInMillis);
+        SingleCrawler singleCrawler = singleExecutorService.submit(singleCrawlerCallable).get();
+
+        List<Crawler> crawlers = new ArrayList<>();
+        for (URL link : singleCrawler.getLinks()) {
+            SingleCrawlerCallable titleCallable = new SingleCrawlerCallable(link, timeoutInMillis);
+            String title = singleExecutorService.submit(titleCallable).get().getTitle();
+
+            crawlers.add(new Crawler(String.valueOf(link), title, new ArrayList<>()));
+        }
+        return crawlers;
+    }
+
+    private Crawler constructRootCrawler(URL url) throws MalformedURLException {
+        Crawler rootCrawler = new Crawler(String.valueOf(url), "My root title", new ArrayList()); // TODO remove hardcoded value
+
+        for (URL keyUrl : masterMap.keySet()) {
+            List<Crawler> crawlers = masterMap.get(keyUrl);
+            for (Crawler crawler : crawlers) {
+                List<Crawler> cs = masterMap.get(new URL(crawler.getUrl()));
+                crawler.getNodes().addAll(cs);
+            }
+            rootCrawler.getNodes().addAll(crawlers);
+
+        }
+
+        return rootCrawler;
     }
 
     @Value("${simplewebcrawler.timeout.millis:10000}")

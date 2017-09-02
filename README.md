@@ -16,8 +16,11 @@ you had to make during development.
 - Identical link can only be process once in 1 crawl
 - Max depth can be set in properties file
 - Connection and read timeout can be set in properties file
-- Simultaneously crawl links  using executors
-- Relative links?
+- Only absolute links are considered
+- Links that start with http are valid
+- Ends with PDF?
+- Use ConcurrentHashMap for visited links?
+- Simultaneously crawl links  using executors?
 - OWASP concerns?
 - Store processed links in db/file
 - Respect robots.txt
@@ -33,7 +36,6 @@ you had to make during development.
 - Depth of search
 - Use java.net.URL
 - Ports adapters
-- Use ConcurrentHashMap for visited links
 
 ## Software Needed
 - JDK 8

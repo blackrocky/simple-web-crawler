@@ -37,7 +37,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jsoup.class, LoggerFactory.class})
-public class CrawlerServiceImplTest {
+public class OldCrawlerServiceImplTest {
     private static final String ROOT_URL = "http://www.mysite.com/";
     private static final String ROOT_TITLE = "My root title";
 
@@ -73,7 +73,7 @@ public class CrawlerServiceImplTest {
 
     private static Logger mockLogger;
 
-    private CrawlerServiceImpl crawlService;
+    private OldCrawlerServiceImpl crawlService;
 
     @BeforeClass
     public static void setUpLogger() {
@@ -85,7 +85,7 @@ public class CrawlerServiceImplTest {
     @Before
     public void setUp() throws IOException {
         initMocks(this);
-        crawlService = new CrawlerServiceImpl();
+        crawlService = new OldCrawlerServiceImpl();
         crawlService.setTimeoutInMillis(DEFAULT_TIMEOUT_MILLIS);
         crawlService.setMaxDepth(DEFAULT_MAX_DEPTH);
     }
