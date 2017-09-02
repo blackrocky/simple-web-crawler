@@ -32,8 +32,7 @@ import simplewebcrawler.config.CrawlerConfig;
 
 import java.net.URL;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,6 +58,16 @@ public class CrawlerIntegrationTest {
                 .andExpect(status().isOk());
 
         verify(crawlerPort).crawlURL(new URL(url));
+    }
+
+    @Test
+    public void shouldReturnBadRequestGivenWrongUrl() throws Exception {
+        String url = "wwab";
+
+        mockMvc.perform(get(String.format("/crawl?url=%s", url)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoMoreInteractions(crawlerPort);
     }
 
     public static class TestConfig {

@@ -73,11 +73,4 @@ public class CrawlerControllerTest {
                 .andExpect(status().isBadRequest());
         verifyZeroInteractions(crawlerPort);
     }
-
-    @Test
-    public void shouldReturnBadRequest_GivenBadUrl() throws Exception {
-        mockMvc.perform(get(String.format("/crawl?url=%s", "wwwww")))
-                .andExpect(status().isBadRequest());
-        verifyZeroInteractions(crawlerPort);
-    }
 }
