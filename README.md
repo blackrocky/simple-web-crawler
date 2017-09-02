@@ -13,7 +13,9 @@ should also have a README file with instructions and potential assumptions
 you had to make during development.
 
 ## Assumptions
-- Same link cannot be processed twice for 1 crawl
+- Identical link can only be process once in 1 crawl
+- Max depth can be set in properties file
+- Connection and read timeout can be set in properties file
 - OWASP concerns?
 - Store processed links in db/file
 - Respect robots.txt
@@ -24,11 +26,13 @@ you had to make during development.
 - Pages that can't be accessed / timed out should be skipped
 - Changing links in a website
 - Https?
-- Depth of search
 - Use db as storage, not cache
 - Use ConcurrentHashMap for visited links?
-- Use java.net.URL
 - Ports adapters?
+
+## DONE
+- Depth of search
+- Use java.net.URL
 
 ## Software Needed
 - JDK 8

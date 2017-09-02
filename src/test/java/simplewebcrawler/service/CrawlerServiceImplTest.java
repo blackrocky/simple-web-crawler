@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -56,7 +55,8 @@ public class CrawlerServiceImplTest {
     private static final List<String> ROOT_LINKS_DUPLICATE = asList(LINK_1_1_URL, LINK_1_1_URL);
 
 
-    private static final int TIMEOUT_MILLIS = 20000;
+    private static final int DEFAULT_TIMEOUT_MILLIS = 20000;
+    private static final int DEFAULT_MAX_DEPTH = 2;
 
     @Mock
     private Document mockRootDocument;
@@ -72,7 +72,6 @@ public class CrawlerServiceImplTest {
 
     private static Logger mockLogger;
 
-    @InjectMocks
     private CrawlerServiceImpl crawlService;
 
     @BeforeClass
@@ -85,7 +84,9 @@ public class CrawlerServiceImplTest {
     @Before
     public void setUp() throws IOException {
         initMocks(this);
-        crawlService.setTimeoutInMillis(TIMEOUT_MILLIS);
+        crawlService = new CrawlerServiceImpl();
+        crawlService.setTimeoutInMillis(DEFAULT_TIMEOUT_MILLIS);
+        crawlService.setMaxDepth(DEFAULT_MAX_DEPTH);
     }
 
     @Test
@@ -100,9 +101,9 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -134,10 +135,10 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -161,7 +162,7 @@ public class CrawlerServiceImplTest {
     @Test
     public void shouldStopCrawlingWhenRootUrlIsNotAccessible() throws Exception {
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenThrow(new IOException());
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenThrow(new IOException());
 
         try {
             crawlService.crawlURL(new URL(ROOT_URL));
@@ -190,9 +191,9 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenThrow(new IOException());
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenThrow(new IOException());
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -219,9 +220,9 @@ public class CrawlerServiceImplTest {
         when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -247,8 +248,8 @@ public class CrawlerServiceImplTest {
         when(mock_1_1_Document.select("a[href]")).thenReturn(new Elements());
 
         mockStatic(Jsoup.class);
-        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
-        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
 
         Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
 
@@ -259,6 +260,43 @@ public class CrawlerServiceImplTest {
         assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_1_URL));
         assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_1_TITLE));
         assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
+    }
+
+    @Test
+    public void shouldStopCrawlingWhenMaxDepthIsReached() throws Exception {
+        crawlService.setMaxDepth(1);
+
+        when(mockRootDocument.select("title")).thenReturn(setUpTitle(ROOT_TITLE));
+        when(mockRootDocument.select("a[href]")).thenReturn(setUpLinks(ROOT_LINKS));
+
+        when(mock_1_1_Document.select("title")).thenReturn(setUpTitle(LINK_1_1_TITLE));
+        when(mock_1_1_Document.select("a[href]")).thenReturn(setUpLinks(LINK_1_1_LINKS));
+
+        when(mock_1_1_1_Document.select("title")).thenReturn(setUpTitle(LINK_1_1_1_TITLE));
+        when(mock_1_1_1_Document.select("a[href]")).thenReturn(new Elements());
+
+        when(mock_1_2_Document.select("title")).thenReturn(setUpTitle(LINK_1_2_TITLE));
+        when(mock_1_2_Document.select("a[href]")).thenReturn(new Elements());
+
+        mockStatic(Jsoup.class);
+        PowerMockito.when(Jsoup.parse(new URL(ROOT_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mockRootDocument);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_1_1_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_1_1_Document);
+        PowerMockito.when(Jsoup.parse(new URL(LINK_1_2_URL), DEFAULT_TIMEOUT_MILLIS)).thenReturn(mock_1_2_Document);
+
+        Crawler crawler = crawlService.crawlURL(new URL(ROOT_URL));
+
+        assertThat(crawler.getUrl(), is(ROOT_URL));
+        assertThat(crawler.getTitle(), is(ROOT_TITLE));
+        assertThat(crawler.getNodes().size(), is(2));
+
+        assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_1_URL));
+        assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_1_TITLE));
+        assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
+
+        assertThat(crawler.getNodes().get(1).getUrl(), is(LINK_1_2_URL));
+        assertThat(crawler.getNodes().get(1).getTitle(), is(LINK_1_2_TITLE));
+        assertThat(crawler.getNodes().get(1).getNodes().size(), is(0));
     }
 
     private Elements setUpLinks(List<String> links) {
