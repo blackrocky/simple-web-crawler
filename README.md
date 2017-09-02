@@ -16,24 +16,24 @@ you had to make during development.
 - Identical link can only be process once in 1 crawl
 - Max depth can be set in properties file
 - Connection and read timeout can be set in properties file
+- Simultaneously crawl links  using executors
 - Relative links?
 - OWASP concerns?
 - Store processed links in db/file
 - Respect robots.txt
 - Multiple machines?
 - Add or update links after being processed? Crawling frequency
-- Simultaneously crawl links  using executors
 - Indexing
 - Pages that can't be accessed / timed out should be skipped
 - Changing links in a website
 - Https?
 - Use db as storage, not cache
-- Use ConcurrentHashMap for visited links?
-- Ports adapters?
 
 ## DONE
 - Depth of search
 - Use java.net.URL
+- Ports adapters
+- Use ConcurrentHashMap for visited links
 
 ## Software Needed
 - JDK 8

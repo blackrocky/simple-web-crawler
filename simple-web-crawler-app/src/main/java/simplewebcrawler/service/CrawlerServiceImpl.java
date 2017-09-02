@@ -62,7 +62,7 @@ public class CrawlerServiceImpl implements CrawlerPort {
         List<Crawler> childNodes = new ArrayList<>();
         links.forEach(link -> {
             try {
-                URL hrefUrl = new URL(link.attr("href"));
+                URL hrefUrl = new URL(link.attr("abs:href"));
                 if (depth == 0) {
                     LOGGER.info("depth is 0, stop crawling");
                     System.out.println("depth is 0, stop crawling");
@@ -72,7 +72,7 @@ public class CrawlerServiceImpl implements CrawlerPort {
                     childNodes.add(crawlURL(hrefUrl, depth-1));
                 }
             } catch (IOException e) {
-                LOGGER.error("Problem accessing url {}, moving on to the next one", link.attr("href"));
+                LOGGER.error("Problem accessing url {}, moving on to the next one", link.attr("abs:href"));
             }
         });
 
