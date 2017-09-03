@@ -11,20 +11,16 @@ import simplewebcrawler.validator.URLValidator;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static java.util.Collections.singletonList;
 
 @Service
 public class OldCrawlerServiceImpl implements CrawlerPort {
     private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
-    private Set<URL> urlSet = new HashSet<>();
+    private Set<URL> urlSet = ConcurrentHashMap.newKeySet();
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     private int timeoutInMillis;
@@ -39,6 +35,7 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
         Crawler crawler = crawlURL(singletonList(url), maxDepth);
         LOGGER.info("FINISHED!!! {}", crawler);
         System.out.println("FINISHED!!! " + crawler);
+        urlSet.clear();
         return crawler;
     }
 
