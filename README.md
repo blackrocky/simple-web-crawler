@@ -18,24 +18,16 @@ you had to make during development.
 - Connection and read timeout can be set in properties file
 - Only absolute links are considered
 - Links that start with http are valid
-- Ends with PDF?
-- Use ConcurrentHashMap for visited links?
-- Simultaneously crawl links  using executors?
-- OWASP concerns?
+- Questionable links like those that end with .js, .exe are filtered out
+- Pages that can't be accessed / timed out should be skipped
+- Ports and adapter / hexagonal pattern is used in this project to avoid excessive coupling
+
+## Future improvements
+- More OWASP concerns?
 - Store processed links in db/file
 - Respect robots.txt
-- Multiple machines?
-- Add or update links after being processed? Crawling frequency
+- Multiple machines consideration
 - Indexing
-- Pages that can't be accessed / timed out should be skipped
-- Changing links in a website
-- Https?
-- Use db as storage, not cache
-
-## DONE
-- Depth of search
-- Use java.net.URL
-- Ports adapters
 
 ## Software Needed
 - JDK 8

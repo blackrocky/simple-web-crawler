@@ -37,7 +37,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jsoup.class, LoggerFactory.class})
-public class OldCrawlerServiceImplTest {
+public class CrawlerServiceV1ImplTest {
     private static final String ROOT_URL = "http://www.mysite.com/";
     private static final String ROOT_TITLE = "My root title";
 
@@ -54,7 +54,6 @@ public class OldCrawlerServiceImplTest {
     private static final List<String> ROOT_LINKS = asList(LINK_1_1_URL, LINK_1_2_URL);
     private static final List<String> ROOT_LINKS_DUPLICATE = asList(LINK_1_1_URL, LINK_1_1_URL);
     private static final List<String> ROOT_LINKS_WITH_MAILTO = asList("mailto:ab@cde.com", LINK_1_1_URL);
-
 
     private static final int DEFAULT_TIMEOUT_MILLIS = 20000;
     private static final int DEFAULT_MAX_DEPTH = 3;
@@ -73,7 +72,7 @@ public class OldCrawlerServiceImplTest {
 
     private static Logger mockLogger;
 
-    private OldCrawlerServiceImpl crawlService;
+    private CrawlerServiceV1Impl crawlService;
 
     @BeforeClass
     public static void setUpLogger() {
@@ -85,7 +84,7 @@ public class OldCrawlerServiceImplTest {
     @Before
     public void setUp() throws IOException {
         initMocks(this);
-        crawlService = new OldCrawlerServiceImpl();
+        crawlService = new CrawlerServiceV1Impl();
         crawlService.setTimeoutInMillis(DEFAULT_TIMEOUT_MILLIS);
         crawlService.setMaxDepth(DEFAULT_MAX_DEPTH);
     }

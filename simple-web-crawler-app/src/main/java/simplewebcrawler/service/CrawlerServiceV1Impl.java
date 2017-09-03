@@ -18,8 +18,8 @@ import java.util.concurrent.*;
 import static java.util.Collections.singletonList;
 
 @Service
-public class OldCrawlerServiceImpl implements CrawlerPort {
-    private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
+public class CrawlerServiceV1Impl implements CrawlerPort {
+    private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceV2Impl.class);
     private Set<URL> urlSet = ConcurrentHashMap.newKeySet();
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
@@ -32,9 +32,10 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
             LOGGER.warn("url must be valid");
             throw new IllegalStateException();
         }
+
         Crawler crawler = crawlURL(singletonList(url), maxDepth);
         LOGGER.info("FINISHED!!! {}", crawler);
-        System.out.println("FINISHED!!! " + crawler);
+
         urlSet.clear();
         return crawler;
     }
@@ -51,7 +52,6 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
             }
             urlSet.add(url);
             LOGGER.info("Crawling url {} with depth {}", url, depth);
-            System.out.println("Crawling url " + url + " with depth " + depth);
 
             SingleCrawlerCallable singleCrawlerCallable = new SingleCrawlerCallable(url, timeoutInMillis);
             Future<SingleCrawler> singleCrawlerFuture = executorService.submit(singleCrawlerCallable);
@@ -64,10 +64,8 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
                 singleCrawler = singleCrawlerFuture.get();
             } catch (ExecutionException e) {
                 LOGGER.warn("Problem accessing url {}", String.valueOf(singleCrawler.getUrl()));
-                System.out.println("Problem accessing url " + String.valueOf(singleCrawler.getUrl()));
             } catch (InterruptedException e) {
                 LOGGER.warn("Problem accessing url {}", String.valueOf(singleCrawler.getUrl()));
-                System.out.println("Problem accessing url " + String.valueOf(singleCrawler.getUrl()));
             }
 
             Crawler crawler = new Crawler(singleCrawler.getUrl().toString(), singleCrawler.getTitle(), new ArrayList<>());
@@ -81,7 +79,6 @@ public class OldCrawlerServiceImpl implements CrawlerPort {
         for (URL linkUrl : linkUrls) {
             if (!URLValidator.isValid(linkUrl) || urlSet.contains(linkUrl)) {
                 LOGGER.info("Skipping url {}", String.valueOf(linkUrl));
-                System.out.println("Skipping url " + String.valueOf(linkUrl));
                 continue;
             }
             urlSet.add(linkUrl);

@@ -37,7 +37,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jsoup.class, LoggerFactory.class})
-public class CrawlerServiceImplTest {
+public class CrawlerServiceV2ImplTest {
     private static final String ROOT_URL = "http://www.mysite.com/";
     private static final String ROOT_TITLE = "My root title";
 
@@ -73,7 +73,7 @@ public class CrawlerServiceImplTest {
 
     private static Logger mockLogger;
 
-    private CrawlerServiceImpl crawlService;
+    private CrawlerServiceV2Impl crawlService;
 
     @BeforeClass
     public static void setUpLogger() {
@@ -85,7 +85,7 @@ public class CrawlerServiceImplTest {
     @Before
     public void setUp() throws IOException {
         initMocks(this);
-        crawlService = new CrawlerServiceImpl();
+        crawlService = new CrawlerServiceV2Impl();
         crawlService.setTimeoutInMillis(DEFAULT_TIMEOUT_MILLIS);
         crawlService.setMaxDepth(DEFAULT_MAX_DEPTH);
     }
@@ -112,13 +112,13 @@ public class CrawlerServiceImplTest {
         assertThat(crawler.getTitle(), is(ROOT_TITLE));
         assertThat(crawler.getNodes().size(), is(2));
 
-        assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_1_URL));
-        assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_1_TITLE));
-        assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
-
-        assertThat(crawler.getNodes().get(1).getUrl(), is(LINK_1_2_URL));
-        assertThat(crawler.getNodes().get(1).getTitle(), is(LINK_1_2_TITLE));
+        assertThat(crawler.getNodes().get(1).getUrl(), is(LINK_1_1_URL));
+        assertThat(crawler.getNodes().get(1).getTitle(), is(LINK_1_1_TITLE));
         assertThat(crawler.getNodes().get(1).getNodes().size(), is(0));
+
+        assertThat(crawler.getNodes().get(0).getUrl(), is(LINK_1_2_URL));
+        assertThat(crawler.getNodes().get(0).getTitle(), is(LINK_1_2_TITLE));
+        assertThat(crawler.getNodes().get(0).getNodes().size(), is(0));
     }
 
     @Test

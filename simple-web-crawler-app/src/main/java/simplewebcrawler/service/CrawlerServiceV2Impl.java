@@ -19,9 +19,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class CrawlerServiceImpl implements CrawlerPort {
-    private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceImpl.class);
-    private Map<URL, List<SingleCrawler>> masterMap = new ConcurrentHashMap<>();
+public class CrawlerServiceV2Impl implements CrawlerPort {
+    private final static Logger LOGGER = LoggerFactory.getLogger(CrawlerServiceV2Impl.class);
+    private Map<SingleCrawler, List<SingleCrawler>> masterMap = new ConcurrentHashMap<>();
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private ExecutorService singleExecutorService = Executors.newSingleThreadExecutor();
 
@@ -36,61 +36,61 @@ public class CrawlerServiceImpl implements CrawlerPort {
         }
 
         try {
-            buildMap(rootUrl, maxDepth);
+            SingleCrawlerCallable singleCrawlerCallable = new SingleCrawlerCallable(rootUrl, timeoutInMillis);
+            SingleCrawler singleCrawler = singleExecutorService.submit(singleCrawlerCallable).get();
+            buildMap(singleCrawler, maxDepth);
+
+            Crawler rootCrawler = constructRootCrawler(singleCrawler);
+            masterMap.clear();
+            return rootCrawler;
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        Crawler rootCrawler = constructRootCrawler(rootUrl);
-        masterMap.clear();
-        return rootCrawler;
+        return null;
     }
 
-    private void buildMap(URL url, int depth) throws MalformedURLException, ExecutionException, InterruptedException {
+    private void buildMap(SingleCrawler singleCrawler, int depth) throws MalformedURLException, ExecutionException, InterruptedException {
         if (depth <= 0) {
             return;
         }
 
-        List<SingleCrawler> children = buildChildren(url);
-        LOGGER.info("****** Added url {}", url);
-        masterMap.putIfAbsent(url, children);
+        List<SingleCrawler> children = buildChildren(singleCrawler);
+        LOGGER.info("****** Added url {}", singleCrawler);
+        masterMap.putIfAbsent(singleCrawler, children);
 
         for (SingleCrawler child : children) {
-            buildMap(child.getUrl(), depth - 1);
+            buildMap(child, depth - 1);
         }
     }
 
-    private List<SingleCrawler> buildChildren(URL url) throws ExecutionException, InterruptedException {
-        SingleCrawlerCallable singleCrawlerCallable = new SingleCrawlerCallable(url, timeoutInMillis);
-        SingleCrawler singleCrawler = singleExecutorService.submit(singleCrawlerCallable).get();
-
+    private List<SingleCrawler> buildChildren(SingleCrawler singleCrawler) throws ExecutionException, InterruptedException {
         List<SingleCrawler> crawlers = new ArrayList<>();
         crawlers.add(singleCrawler);
 
         for (URL link : singleCrawler.getLinks()) {
-            crawlers.add(new SingleCrawler(link, "test Title", new ArrayList<>())); // TODO remove hardcoded value
+            crawlers.add(new SingleCrawler(link, "My ONE ONE title", new ArrayList<>())); // TODO remove hardcoded value
         }
-
 
         return crawlers;
     }
 
-    private Crawler constructRootCrawler(URL url) throws MalformedURLException {
+    private Crawler constructRootCrawler(SingleCrawler rootSingleCrawler) throws MalformedURLException {
         LOGGER.info("number of keys: {}", masterMap.keySet().size());
 
-        Crawler rootCrawler = new Crawler(String.valueOf(url), "My root title", new ArrayList<>()); // TODO remove hardcoded value
+        Crawler rootCrawler = mapSingleCrawlerToCrawler(rootSingleCrawler);
         List<Crawler> crawlers = new ArrayList<>();
 
-        for (URL keyUrl : masterMap.keySet()) {
-            List<SingleCrawler> singleCrawlers = masterMap.get(keyUrl);
-            Crawler crawler = new Crawler(String.valueOf(keyUrl), "my key title", new ArrayList<>());
+        for (SingleCrawler singleCrawlerKey : masterMap.keySet()) {
+            List<SingleCrawler> singleCrawlers = masterMap.get(singleCrawlerKey);
+            Crawler crawler = new Crawler(String.valueOf(singleCrawlerKey.getUrl()), singleCrawlerKey.getTitle(), new ArrayList<>());
             List<Crawler> childCrawlers = new ArrayList<>();
             for (SingleCrawler singleCrawler : singleCrawlers) {
                 Crawler childCrawler = new Crawler(String.valueOf(singleCrawler.getUrl()), singleCrawler.getTitle(), new ArrayList());
 
-                List<SingleCrawler> cs = masterMap.get(singleCrawler.getUrl());
+                List<SingleCrawler> cs = masterMap.get(singleCrawler);
                 if (cs != null) {
                     childCrawler.getNodes()
                             .addAll(cs.stream()
@@ -99,7 +99,9 @@ public class CrawlerServiceImpl implements CrawlerPort {
                             );
                 }
 
-                childCrawlers.add(childCrawler);
+                if (!childCrawler.getUrl().equalsIgnoreCase(String.valueOf(crawler.getUrl()))) {
+                    childCrawlers.add(childCrawler);
+                }
             }
             LOGGER.info("childCrawler size {}", childCrawlers.size());
 
@@ -110,30 +112,22 @@ public class CrawlerServiceImpl implements CrawlerPort {
                                 .map(c -> mapSingleCrawlerToCrawler(c)).collect(Collectors.toList()));
             }
 
-            if (!crawler.getUrl().equalsIgnoreCase(String.valueOf(url))) {
+            if (!crawler.getUrl().equalsIgnoreCase(String.valueOf(rootSingleCrawler.getUrl()))) {
                 crawlers.add(crawler);
             }
         }
+
+
         LOGGER.info("crawlers size {}", crawlers.size());
 
         rootCrawler.getNodes().addAll(crawlers);
-//        rootCrawler.getNodes()
-//                .addAll(masterMap.keySet().stream()
-//                        .filter(c -> URLValidator.isValid(c))
-//                        .map(c -> mapUrlToCrawler(c))
-//                        .collect(Collectors.toList()));
-//
-
         LOGGER.info("root crawler has {} children", rootCrawler.getNodes().size());
+
         return rootCrawler;
     }
 
     private Crawler mapSingleCrawlerToCrawler(SingleCrawler singleCrawler) {
         return new Crawler(String.valueOf(singleCrawler.getUrl()), singleCrawler.getTitle(), new ArrayList());
-    }
-
-    private Crawler mapUrlToCrawler(URL url) {
-        return new Crawler(String.valueOf(url), "my title", new ArrayList());
     }
 
     @Value("${simplewebcrawler.timeout.millis:10000}")
