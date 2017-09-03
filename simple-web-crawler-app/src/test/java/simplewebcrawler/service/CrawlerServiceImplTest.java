@@ -9,7 +9,6 @@ import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -38,7 +37,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jsoup.class, LoggerFactory.class})
-@Ignore("work in progress")
 public class CrawlerServiceImplTest {
     private static final String ROOT_URL = "http://www.mysite.com/";
     private static final String ROOT_TITLE = "My root title";

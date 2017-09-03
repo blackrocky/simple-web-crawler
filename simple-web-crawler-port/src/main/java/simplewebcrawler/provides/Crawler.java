@@ -33,12 +33,12 @@ public class Crawler {
 
     @Override
     public boolean equals(Object o) {
-        return EqualsBuilder.reflectionEquals(this, o);
+        return EqualsBuilder.reflectionEquals(this, o, "title", "nodes");
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this, "title", "nodes");
     }
 
     @Override
